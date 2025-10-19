@@ -1,0 +1,33 @@
+.App {
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+.main-content {
+  padding-top: 80px;
+}
+
+.error-message {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 0 20px;
+}
+
+.error-message p {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #f5c6cb;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding-top: 70px;
+  }
+  
+  .error-message {
+    padding: 0 16px;
+  }
+}
