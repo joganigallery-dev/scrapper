@@ -45,6 +45,9 @@ class ShopifyScraper {
       let totalProducts = 0;
       let hasMore = false;
 
+      // First, fetch all collections to map products to collections
+      const collectionsMap = await this.fetchCollectionsWithProducts(storeUrl);
+
       // Try different approaches to get products
       let productData = null;
       
@@ -122,6 +125,8 @@ class ShopifyScraper {
 
       // Process products - NO LIMITS
       productData.forEach((product, index) => {
+        const productId = product.id ? String(product.id) : `product-${index}`;
+        const productCollections = collectionsMap.get(productId) || [];
 
         const processedProduct = {
           id: product.id || `product-${index}`,
@@ -135,6 +140,7 @@ class ShopifyScraper {
           images: this.extractImages(product.images),
           description: product.body_html || '',
           tags: product.tags || [],
+          collections: productCollections,
           created_at: product.created_at || '',
           updated_at: product.updated_at || '',
           published_at: product.published_at || new Date().toISOString(),
@@ -363,6 +369,55 @@ class ShopifyScraper {
       taxable: variant.taxable !== false,
       image: variant.image || null
     }));
+  }
+
+  async fetchCollectionsWithProducts(storeUrl) {
+    const collectionsMap = new Map();
+
+    try {
+      console.log('Fetching collections...');
+      const response = await axios.get(`${storeUrl}/collections.json`, {
+        headers: this.baseHeaders,
+        timeout: 10000
+      });
+
+      if (response.data && response.data.collections) {
+        const collections = response.data.collections;
+        console.log(`Found ${collections.length} collections`);
+
+        for (const collection of collections) {
+          try {
+            const collectionResponse = await axios.get(`${storeUrl}/collections/${collection.handle}/products.json`, {
+              headers: this.baseHeaders,
+              timeout: 10000
+            });
+
+            if (collectionResponse.data && collectionResponse.data.products) {
+              collectionResponse.data.products.forEach(product => {
+                const productId = String(product.id);
+                if (!collectionsMap.has(productId)) {
+                  collectionsMap.set(productId, []);
+                }
+                collectionsMap.get(productId).push({
+                  id: collection.id,
+                  title: collection.title,
+                  handle: collection.handle
+                });
+              });
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 100));
+          } catch (error) {
+            console.log(`Failed to fetch products for collection ${collection.handle}:`, error.message);
+          }
+        }
+      }
+    } catch (error) {
+      console.log('Failed to fetch collections:', error.message);
+    }
+
+    console.log(`Mapped ${collectionsMap.size} products to collections`);
+    return collectionsMap;
   }
 }
 

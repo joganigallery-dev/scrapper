@@ -3,35 +3,89 @@ import { Download, Search } from 'lucide-react';
 import ProductsTable from './ProductsTable';
 import CollectionsTable from './CollectionsTable';
 import Pagination from './Pagination';
+import FilterPanel from './FilterPanel';
 import './ResultsSection.css';
 
-const ResultsSection = ({ 
-  results, 
-  searchType, 
-  loading, 
+const ResultsSection = ({
+  results,
+  searchType,
+  loading,
   loadingProgress,
-  currentPage, 
-  totalItems, 
-  onPageChange, 
-  onExport 
+  currentPage,
+  totalItems,
+  onPageChange,
+  onExport
 }) => {
   const [searchFilter, setSearchFilter] = useState('');
   const [selectedItems, setSelectedItems] = useState([]);
+  const [activeFilters, setActiveFilters] = useState({
+    vendors: [],
+    tags: [],
+    collections: [],
+    priceRange: { min: '', max: '' },
+    searchTitle: ''
+  });
 
   const filteredData = () => {
     if (!results) return [];
-    
-    const data = searchType === 'products' ? results.products : results.collections;
+
+    let data = searchType === 'products' ? results.products : results.collections;
     if (!data) return [];
-    
+
+    if (searchType === 'products') {
+      if (activeFilters.vendors.length > 0) {
+        data = data.filter(item => activeFilters.vendors.includes(item.vendor));
+      }
+
+      if (activeFilters.tags.length > 0) {
+        data = data.filter(item =>
+          item.tags && item.tags.some(tag => activeFilters.tags.includes(tag))
+        );
+      }
+
+      if (activeFilters.collections.length > 0) {
+        data = data.filter(item =>
+          item.collections && item.collections.some(col =>
+            activeFilters.collections.includes(col.title || col)
+          )
+        );
+      }
+
+      if (activeFilters.priceRange.min !== '' || activeFilters.priceRange.max !== '') {
+        const minPrice = parseFloat(activeFilters.priceRange.min) || 0;
+        const maxPrice = parseFloat(activeFilters.priceRange.max) || Infinity;
+        data = data.filter(item => {
+          const price = parseFloat(item.price) || 0;
+          return price >= minPrice && price <= maxPrice;
+        });
+      }
+
+      if (activeFilters.searchTitle.trim()) {
+        const searchTerm = activeFilters.searchTitle.toLowerCase();
+        data = data.filter(item => item.title.toLowerCase().includes(searchTerm));
+      }
+    }
+
     if (!searchFilter.trim()) return data;
-    
+
     const filter = searchFilter.toLowerCase();
-    return data.filter(item => 
+    return data.filter(item =>
       item.title.toLowerCase().includes(filter) ||
       (item.vendor && item.vendor.toLowerCase().includes(filter)) ||
       (item.description && item.description.toLowerCase().includes(filter))
     );
+  };
+
+  const handleFilterChange = (filters) => {
+    setActiveFilters(filters);
+    setSelectedItems([]);
+  };
+
+  const handleExportFiltered = () => {
+    const filtered = filteredData();
+    if (filtered.length > 0) {
+      onExport('csv', filtered);
+    }
   };
 
   const handleSelectAll = (checked) => {
@@ -61,6 +115,9 @@ const ResultsSection = ({
 
   const itemType = searchType === 'products' ? 'PRODUCTS' : 'COLLECTIONS';
 
+  const displayedData = filteredData();
+  const displayedCount = displayedData.length;
+
   return (
     <section className="results-section">
       <div className="container">
@@ -69,8 +126,13 @@ const ResultsSection = ({
             <h2 className="results-title">
               TOTAL {itemType} {totalItems}
             </h2>
+            {displayedCount !== totalItems && (
+              <p className="filtered-count">
+                Showing {displayedCount} of {totalItems} {itemType.toLowerCase()}
+              </p>
+            )}
           </div>
-          
+
           <div className="results-actions">
             <div className="export-dropdown">
               <select className="export-select" onChange={(e) => {
@@ -79,13 +141,13 @@ const ResultsSection = ({
                 } else if (e.target.value === 'json') {
                   onExport('json');
                 }
-                e.target.value = 'shopify'; // Reset to default
+                e.target.value = 'shopify';
               }}>
                 <option value="shopify">Export to: Shopify</option>
                 <option value="json">Export to: JSON</option>
               </select>
             </div>
-            
+
             <div className="search-filter">
               <Search size={16} className="search-icon" />
               <input
@@ -98,6 +160,14 @@ const ResultsSection = ({
             </div>
           </div>
         </div>
+
+        {searchType === 'products' && (
+          <FilterPanel
+            products={results.products || []}
+            onFilterChange={handleFilterChange}
+            onExportFiltered={handleExportFiltered}
+          />
+        )}
 
         <Pagination
           currentPage={currentPage}
@@ -119,7 +189,7 @@ const ResultsSection = ({
           
           {searchType === 'products' ? (
             <ProductsTable
-              products={filteredData()}
+              products={displayedData}
               loading={loading}
               selectedItems={selectedItems}
               onSelectAll={handleSelectAll}
@@ -128,7 +198,7 @@ const ResultsSection = ({
             />
           ) : (
             <CollectionsTable
-              collections={filteredData()}
+              collections={displayedData}
               loading={loading}
               selectedItems={selectedItems}
               onSelectAll={handleSelectAll}

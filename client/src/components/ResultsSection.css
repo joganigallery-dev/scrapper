@@ -1,6 +1,6 @@
 .results-section {
   padding: 40px 0;
-  background-color: #ffffff;
+  background: linear-gradient(to bottom, #f8fafc 0%, #ffffff 100%);
 }
 
 .results-header {
@@ -17,10 +17,20 @@
 }
 
 .results-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: #1f2937;
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0;
+}
+
+.filtered-count {
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+  margin: 8px 0 0 0;
 }
 
 .results-actions {
@@ -34,20 +44,28 @@
 }
 
 .export-select {
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 6px;
-  padding: 8px 12px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
   font-size: 14px;
-  font-weight: 500;
-  color: #991b1b;
+  font-weight: 600;
+  color: white;
   cursor: pointer;
-  min-width: 150px;
+  min-width: 170px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+}
+
+.export-select:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .export-select:focus {
   outline: none;
-  border-color: #f87171;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
 }
 
 .search-filter {
@@ -64,27 +82,33 @@
 }
 
 .filter-input {
-  padding: 8px 12px 8px 36px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  padding: 10px 12px 10px 36px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
   font-size: 14px;
-  width: 200px;
+  width: 220px;
   background-color: white;
+  transition: all 0.2s ease;
 }
 
 .filter-input:focus {
   outline: none;
-  border-color: #20b2aa;
-  box-shadow: 0 0 0 2px rgba(32, 178, 170, 0.1);
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .table-container {
   background: white;
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e2e8f0;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   position: relative;
+  transition: box-shadow 0.3s ease;
+}
+
+.table-container:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
 .loading-overlay {

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Header from './components/Header';
 import SearchSection from './components/SearchSection';
 import ResultsSection from './components/ResultsSection';
+import LoadingSkeleton from './components/LoadingSkeleton';
 import './App.css';
 
 function App() {
@@ -15,12 +16,14 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [loadingProgress, setLoadingProgress] = useState('');
+  const [loadedCount, setLoadedCount] = useState(0);
 
   const handleSearch = async (searchParams) => {
     setLoading(true);
     setError(null);
     setCurrentPage(1);
     setLoadingProgress('Starting to scrape store...');
+    setLoadedCount(0);
     
     try {
       // NO LIMITS - scrape everything
@@ -45,10 +48,14 @@ function App() {
         throw new Error(data.error || 'Failed to scrape store');
       }
 
+      const itemType = searchParams.type === 'products' ? 'products' : 'collections';
+      const itemCount = data.data[itemType]?.length || 0;
+      setLoadedCount(itemCount);
+
       setResults(data.data);
       setTotalItems(data.data.total);
       setSearchData(searchParams);
-      
+
       // Auto-export if export type is specified
       if (searchParams.exportType === 'free' || searchParams.exportType === 'all') {
         setLoadingProgress('Exporting data...');
@@ -359,6 +366,17 @@ function App() {
         {error && (
           <div className="error-message">
             <p>{error}</p>
+          </div>
+        )}
+
+        {loading && !results && (
+          <div className="container" style={{ maxWidth: '1200px', margin: '20px auto', padding: '0 20px' }}>
+            <LoadingSkeleton
+              count={10}
+              loadedCount={loadedCount}
+              totalCount={totalItems}
+              message={loadingProgress}
+            />
           </div>
         )}
 

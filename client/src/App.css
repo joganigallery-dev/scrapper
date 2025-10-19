@@ -1,10 +1,16 @@
 .App {
   min-height: 100vh;
-  background-color: #ffffff;
+  background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
 }
 
 .main-content {
   padding-top: 80px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
 .error-message {
@@ -14,12 +20,14 @@
 }
 
 .error-message p {
-  background-color: #f8d7da;
-  color: #721c24;
-  padding: 16px;
-  border-radius: 8px;
-  border: 1px solid #f5c6cb;
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #991b1b;
+  padding: 18px 24px;
+  border-radius: 12px;
+  border: 2px solid #fca5a5;
   text-align: center;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
 }
 
 @media (max-width: 768px) {
